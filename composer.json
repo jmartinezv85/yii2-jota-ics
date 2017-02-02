@@ -1,0 +1,13 @@
+{
+    "name": "jorge/alt120",
+    "description": "Yii2 2 modules",
+    "license": "Creative commons",
+    "authors": [
+        {
+            "name": "Jorge Martinez",
+            "email": "jorge.martinez@alt120.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
