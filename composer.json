@@ -14,7 +14,8 @@
         "php": ">=5.4.0",
     },
     "autoload": {
-    "psr-4": {
-      "jmartinezv85\\yii\\jota\\ics\\": ""
+        "psr-4": {
+            "jmartinezv85\\yii\\jota\\ics\\": ""
+        }
     }
 }
