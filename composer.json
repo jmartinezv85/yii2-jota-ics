@@ -9,7 +9,6 @@
             "email": "jmartinezv85@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
     "require": {
         "php": "^5.4 || ^7.0"
     }
