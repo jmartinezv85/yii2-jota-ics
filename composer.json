@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "jmartinezv85\\yii\\jota\\ics\\": ""
+            "jmartinez": ""
         }
     }
 }
