@@ -1,132 +1,117 @@
 <?php
-namespace alt120\ics;
-
 /**
- * ICS.php
- * =======
- * Use this class to create an .ics file.
- *
- * Usage
- * -----
- * Basic usage - generate ics file contents (see below for available properties):
- *   $ics = new ICS($props);
- *   $ics_file_contents = $ics->to_string();
- *
- * Setting properties after instantiation
- *   $ics = new ICS();
- *   $ics->set('summary', 'My awesome event');
- *
- * You can also set multiple properties at the same time by using an array:
- *   $ics->set(array(
- *     'dtstart' => 'now + 30 minutes',
- *     'dtend' => 'now + 1 hour'
- *   ));
- *
- * Available properties
- * --------------------
- * description
- *   String description of the event.
- * dtend
- *   A date/time stamp designating the end of the event. You can use either a
- *   DateTime object or a PHP datetime format string (e.g. "now + 1 hour").
- * dtstart
- *   A date/time stamp designating the start of the event. You can use either a
- *   DateTime object or a PHP datetime format string (e.g. "now + 1 hour").
- * location
- *   String address or description of the location of the event.
- * summary
- *   String short summary of the event - usually used as the title.
- * url
- *   A url to attach to the the event. Make sure to add the protocol (http://
- *   or https://).
+ * Class to create an .ics file.
  */
 
 class ICS {
-  const DT_FORMAT = 'Ymd\THis\Z';
 
-  protected $properties = array();
-  private $available_properties = array(
+  const DATETIME_FORMAT = 'Ymd\THis\Z';
+
+  public $description;
+  public $dtend;
+  public $dtstart;
+  public $location;
+  public $summary;
+  public $url;
+  /**
+   * 
+   */
+  private $availableProperties = [
     'description',
     'dtend',
     'dtstart',
     'location',
     'summary',
     'url'
-  );
-
-  public function __construct($props) {
-    $this->set($props);
+  ];
+  /**
+   * 
+   */
+  public function __construct($properties) {
+      $this->set($properties);
   }
-
-  public function set($key, $val = false) {
-    if (is_array($key)) {
-      foreach ($key as $k => $v) {
-        $this->set($k, $v);
-      }
-    } else {
-      if (in_array($key, $this->available_properties)) {
-        $this->properties[$key] = $this->sanitize_val($val, $key);
-      }
-    }
+  /**
+   * 
+   */
+  public function set($key=[]) {
+      foreach ($key as $k => $value) 
+        $this->setPropertie($k, $value);
   }
-
-  public function to_string() {
-    $rows = $this->build_props();
+  /**
+  * 
+  */
+  private function setPropertie($key,$value)
+  {
+    if (in_array($key, $this->availableProperties)) 
+        $this->{$key} = $this->sanitizeValue($value, $key);
+  }
+  /**
+   *
+   * @return string
+   */
+  public function toString() {
+    $rows = $this->buildProperties();
     return implode("\r\n", $rows);
   }
-
-  private function build_props() {
-    // Build ICS properties - add header
-    $ics_props = array(
+  /**
+   * @return mixed 
+   */
+  private function buildProperties() {
+    // Build ICS properties - header
+    $icsProperties = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
       'PRODID:-//hacksw/handcal//NONSGML v1.0//EN',
       'CALSCALE:GREGORIAN',
       'BEGIN:VEVENT'
-    );
+    ];
 
-    // Build ICS properties - add header
-    $props = array();
-    foreach($this->properties as $k => $v) {
-      $props[strtoupper($k . ($k === 'url' ? ';VALUE=URI' : ''))] = $v;
-    }
-
-    // Set some default values
-    $props['DTSTAMP'] = $this->format_timestamp('now');
-    $props['UID'] = uniqid();
+    $properties = [];
+    foreach($this->availableProperties as $k => $value) 
+      $properties[strtoupper($k . ($k === 'url' ? ';VALUE=URI' : ''))] = $this->{$k};
+        
+    // Set default values
+    $properties['DTSTAMP'] = $this->formatTimestamp('now');
+    $properties['UID'] = uniqid();
 
     // Append properties
-    foreach ($props as $k => $v) {
-      $ics_props[] = "$k:$v";
-    }
+    foreach ($properties as $k => $value) 
+      $icsProperties[] = "$k:$value";
+    
+    // Build ICS properties - footer
+    $icsProperties[] = 'END:VEVENT';
+    $icsProperties[] = 'END:VCALENDAR';
 
-    // Build ICS properties - add footer
-    $ics_props[] = 'END:VEVENT';
-    $ics_props[] = 'END:VCALENDAR';
+    return $icsProperties;
+  }
+  /**
+   * 
+   * @return string
+   */
+  private function sanitizeValue($value, $key = false) {
+    
+    if($key=='dtstart') 
+      $value = $this->formatTimestamp($value);
 
-    return $ics_props;
+    if($key!='dtend' && $key!='dtstamp'&& $key!='dtstart')  
+      $value = $this->escapeString($value);
+      
+    return $value;
+  }
+  /**
+   * 
+   * @return string
+   */
+  private function formatTimestamp($timestamp) {
+      $dt = new DateTime($timestamp);
+      return $dt->format(self::DATETIME_FORMAT);
+  }
+  /**
+   * 
+   * @return string
+   */
+  private function escapeString($str) {
+      return preg_replace('/([\,;])/','\\\$1', $str);
   }
 
-  private function sanitize_val($val, $key = false) {
-    switch($key) {
-      case 'dtend':
-      case 'dtstamp':
-      case 'dtstart':
-        $val = $this->format_timestamp($val);
-        break;
-      default:
-        $val = $this->escape_string($val);
-    }
-
-    return $val;
-  }
-
-  private function format_timestamp($timestamp) {
-    $dt = new DateTime($timestamp);
-    return $dt->format(self::DT_FORMAT);
-  }
-
-  private function escape_string($str) {
-    return preg_replace('/([\,;])/','\\\$1', $str);
-  }
 }
