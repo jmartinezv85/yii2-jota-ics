@@ -1,13 +1,16 @@
 {
-    "name": "jorge/alt120",
-    "description": "Yii2 2 modules",
-    "license": "Creative commons",
+    "name": "jmartinez/yii2-jota-ics",
+    "description": "ICS yii2 class",
+    "type": "yii2-extension",
+    "license": "MIT",
     "authors": [
         {
             "name": "Jorge Martinez",
-            "email": "jorge.martinez@alt120.com"
+            "email": "jmartinezv85@gmail.com"
         }
     ],
     "minimum-stability": "stable",
-    "require": {}
+    "require": {
+        "php": "^5.4 || ^7.0",
+    }
 }
