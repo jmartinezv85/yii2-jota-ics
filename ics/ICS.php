@@ -1,4 +1,7 @@
 <?php
+namespace jmartinez\yii\ics;
+
+use DateTime;
 /**
  * Class to create an .ics file.
  */
@@ -27,7 +30,8 @@ class ICS {
   /**
    * 
    */
-  public function __construct($properties) {
+  public function __construct($properties=[]) {
+    
       $this->set($properties);
   }
   /**
@@ -68,10 +72,10 @@ class ICS {
 
     $properties = [];
     foreach($this->availableProperties as $k => $value) 
-      $properties[strtoupper($k . ($k === 'url' ? ';VALUE=URI' : ''))] = $this->{$k};
+      $properties[strtoupper($value . ($value === 'url' ? ';VALUE=URI' : ''))] = $this->{$value};
         
     // Set default values
-    $properties['DTSTAMP'] = $this->formatTimestamp('now');
+    $properties['DTSTAMP'] = $this->formatTimestampString('now');
     $properties['UID'] = uniqid();
 
     // Append properties
@@ -90,7 +94,7 @@ class ICS {
    */
   private function sanitizeValue($value, $key = false) {
     
-    if($key=='dtstart') 
+    if($key=='dtstart' || $key=='dtend') 
       $value = $this->formatTimestamp($value);
 
     if($key!='dtend' && $key!='dtstamp'&& $key!='dtstart')  
@@ -99,12 +103,26 @@ class ICS {
     return $value;
   }
   /**
+  * @return string
+  */
+  private function formatTimestampString($string){
+      $dt = new DateTime($string);
+      return $dt->format(self::DATETIME_FORMAT);
+
+  }
+  /**
    * 
    * @return string
    */
   private function formatTimestamp($timestamp) {
-      $dt = new DateTime($timestamp);
+    /*echo "$timestamp";
+    echo intval($timestamp);
+    */
+      $dt = new DateTime();
+      $dt->setTimestamp(intval(substr($timestamp, 0, 10)));
+      //return $dt->format(self::DATETIME_FORMAT);
       return $dt->format(self::DATETIME_FORMAT);
+      
   }
   /**
    * 
