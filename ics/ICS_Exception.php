@@ -1,4 +1,10 @@
 <?php 
+/**
+ * @Author: Jorge Martinez
+ * @Date:   2017-02-07 23:45:45
+ * @Last Modified by:   Jorge Martinez
+ * @Last Modified time: 2017-02-08 00:35:34
+ */
 
 namespace jmartinez\yii\ics;
 
