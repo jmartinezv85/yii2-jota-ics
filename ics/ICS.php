@@ -2,6 +2,9 @@
 namespace jmartinez\yii\ics;
 
 use DateTime;
+use ReflectionClass;
+use ReflectionProperty;
+use jmartinez\yii\ics\ICS_Exception;
 /**
  * Class to create an .ics file.
  */
@@ -19,20 +22,18 @@ class ICS {
   /**
    * 
    */
-  private $availableProperties = [
-    'description',
-    'dtend',
-    'dtstart',
-    'location',
-    'summary',
-    'url'
-  ];
+  private $availableProperties = [];
   /**
    * 
    */
   public function __construct($properties=[]) {
-    
-      $this->set($properties);
+    $reflect = new ReflectionClass($this);
+    foreach ($reflect->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) 
+          $this->availableProperties[] = $prop->getName() ;
+
+    $this->set($properties);
+
+
   }
   /**
    * 
@@ -56,6 +57,19 @@ class ICS {
   public function toString() {
     $rows = $this->buildProperties();
     return implode("\r\n", $rows);
+  }
+  /**
+   * @param string $filename
+   * @return file
+   */
+  public function Download($filename="Volksvaguen-citaprevia.ics")
+  {
+       if(empty($this->dtstart)) throw new ICS_Exception("Error Processing Request", 1);
+      
+       header('Content-type: text/calendar; charset=utf-8');
+       header('Content-Disposition: attachment; filename='.$filename);
+       echo $this->toString();
+       exit;
   }
   /**
    * @return mixed 
@@ -131,5 +145,6 @@ class ICS {
   private function escapeString($str) {
       return preg_replace('/([\,;])/','\\\$1', $str);
   }
+
 
 }
