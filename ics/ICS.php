@@ -62,7 +62,7 @@ class ICS {
    * @param string $filename
    * @return file
    */
-  public function Download($filename="Volksvaguen-citaprevia.ics")
+  public function Download($filename="ical.ics")
   {
        if(empty($this->dtstart)) throw new ICS_Exception("Error Processing Request", 1);
       
